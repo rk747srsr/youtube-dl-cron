@@ -10,6 +10,9 @@ youtube-dl-cron.shは、指定したYouTubeチャンネルの(過去チェック
 cronに` 3 23  *  *  *  youtube-dl-cron.sh チャンネル'と登録しておけば、毎日23時3分にチャンネルをチェックして、更新があれば動画を保存します
 ! MacOS 10.15でcronを動作させる場合は、システム環境設定→セキュリティとプライバシー→フルディスクアクセスに`/usr/sbin/cron'を追記してください
 
+* スクリプトがほぼ同じnico-dl-cron.shについても、このreadme-J.txtの末尾で触れます
+! ニコ生、タイムシフトの保存はできません
+
 
 必要なコマンド:
 youtube-dl-cron.shの動作には、以下のコマンドが必要です
@@ -94,7 +97,7 @@ youtube-dl-cron.shに実行権を与えて(chmod 755 youtube-dl-cron.sh)、`/usr
 
 使用方法:
 
- ダウンロード:  youtube-dl-cron.sh チャンネル -i --filter=キーワード|FILE -o ファイル名
+ ダウンロード:  youtube-dl-cron.sh チャンネル
 必須:
  チャンネル
 channel/チャンネルID、user/ユーザー名、又は、vartmpdir/youtube_aliasesで設定したエイリアス
@@ -106,14 +109,19 @@ channel/チャンネルID、user/ユーザー名、又は、vartmpdir/youtube_al
 キーワードにヒットする動画だけ保存
 `FILE'で、キーワードをvartmpdir/youtube_チャンネル名_filterから読み込みます
 * キーワードは複数設定可。標準入力では2ワード目以降はスペースで区切り(--filter=WORD1 WORD2 ..)、vartmpdir/youtube_チャンネル名_filterでは1ワード1行にしてください
- -o ファイル名
+ -o /ディレクトリ/ファイル名
 動画を、ファイル名年日_動画ID.mp4として保存。/絶対パスのみ/、/絶対パス/ファイル名と指定することも可能
 
- 過去動画をダウンロード:  youtube-dl-cron.sh --ignore-U 本数 チャンネル -i --filter= -o
+ 過去動画をダウンロード:  youtube-dl-cron.sh --ignore-U 本数 チャンネル
+必須:
  --ignore-U 本数
 ローカルに保持しているIDから動画を保存
 本数で、ローカルに保持しているID中、新しい順に何本保存するか指定
 * 本数を省略した場合、ローカルに保持している中で最新のIDのみダウンロードします
+任意:
+ -i
+ --filter=キーワード
+ -o /ディレクトリ/ファイル名
 
  動画IDリストを更新(生成):  youtube-dl-cron.sh -U チャンネル
 
@@ -123,7 +131,7 @@ channel/チャンネルID、user/ユーザー名、又は、vartmpdir/youtube_al
  -N チャンネル
 更新分のみ表示
 
- ヘルプ:  -h
+ ヘルプ:  youtube-dl-cron.sh -h
 
  YouTube Liveを録画:  youbue-dl-cron.sh --live|-r 動画ID -t 分
 ! このオプションはテスト中です
@@ -136,3 +144,22 @@ watch?v=id、又は、id
 録画する時間を分で指定
 `0'を指定した場合、番組終了まで録画(最大24時間)
 ! 録画停止まで、指定した分の数倍の時間が掛かります
+
+
+使用方法(nico-dl-cron.sh):
+
+ ダウンロード:  nico-dl-cron.sh チャンネル
+ 過去動画をダウンロード:  nico-dl-cron.sh --ignore-U 本数 チャンネル
+ 動画IDリストを更新(生成):  nico-dl-cron.sh -U チャンネル
+ チャンネルの動画リストを表示:  nico-dl-cron.sh -n|N チャンネル
+ ヘルプ:  nico-dl-cron.sh -h
+
+* ログインの必要が無いアーカイヴのみ対応。ニコ生とタイムシフトは、基本、保存できません
+
+ログイン不要で無料視聴できるタイムシフトのみ、以下の方法で保存できます
+
+1. ブラウザでタイムシフトの動画を再生(音声はミュートにした方が好い)
+2. 再生したままの状態で、while :; do youtube-dl https://live2.nicovideo.jp/watch/lv数字;  [[ ! `ls *.part` ]] && break; done
+
+* 途中から有料パートが始まる動画の場合、有料部分は黒画面無音になります
+! 有料パートが途中から始まる動画でも、保存が終了するまで停止しないでください。途中で停止させると再生できないファイルになります
