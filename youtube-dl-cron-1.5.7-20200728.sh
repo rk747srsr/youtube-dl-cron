@@ -292,58 +292,58 @@ case $1 in
   # download
   echo "$$ $0 $* $errtzeor"
   echo "$$ [$recdl] `date +'%m-%d %H:%M:%S'` start"
-    if [ $option_r ]; then
-      # live
-      optarg_f=`youtube-dl --list-formats $mp4 | awk '/(best)/{print $1}'`
-      youtube-dl -q -f $optarg_f --hls-use-mpegts $mp4 --no-part -o $tmpdir/$name.mp4 2>/dev/null &
-      # kill timer
-      dursec() {
-        ffmpeg -i $tmpdir/$name.mp4 2>&1 | tr ':.' ' ' | awk '/Duration/{print ($2*360) + ($3*60) + $4}'
-      }
-      psffmpeg() {
-        ps x | grep -v grep | grep ffmpeg.*$id
-      }
-      while :
-      do
-        sleep 60
-        case $optarg_t in
-          86400)
-          sleep 240
-          # dash downloads
-          dashcode=`youtube-dl --list-formats $mp4`
-          if [[ `echo "$dashcode" | grep 'DASH video'` && ! -f $outdir/${name}_DASH.mp4 ]]; then
-            [ ! "$dashdl" ] && echo "$$ [onair] `date '+%m-%d %H:%M:%S'` stop" && dates_stop=`date +%s`
-            echo "$$ [backup] `date '+%m-%d %H:%M:%S'` mpeg-dash downloads"
-            youtube-dl -q -f `echo "$dashcode" | grep 'mp4_dash' | awk 'END{print $1}'` $mp4 -o $tmpdir/${name}_VIDEO.mp4
-            if [[ `name=${name}_VIDEO; dursec; name=${name/_VIDEO}` -ge $(($dates_stop - $dates_start - 300)) ]]; then
-              youtube-dl -q -f `echo "$dashcode" | grep 'm4a_dash' | awk 'END{print $1}'` $mp4 -o $tmpdir/${name}_AUDIO.m4a
-              ffmpeg -i $tmpdir/${name}_VIDEO.mp4 -i $tmpdir/${name}_AUDIO.m4a -loglevel error -vcodec copy -acodec copy $outdir/${name}_DASH.mp4
-              echo "$$ [backup] `date '+%m-%d %H:%M:%S'` successful"
-              echo "$$ d`ffmpeg -i $outdir/${name}_DASH.mp4 2>&1 | grep -Po '(?<= D).+(?=\.[0-9]{2},)'`"
-            else
-              echo "$$ [error] `date '+%m-%d %H:%M:%S'` backup failed"
-              rm $tmpdir/${name}_VIDEO.mp4
-            fi
-            dashdl=on
-          fi
-          [[ ! `psffmpeg` || `date +%s` -ge $datedonedays ]] && break
-          ;;
-          *)
-          [[ `dursec` -ge $optarg_t || ! `psffmpeg` ]] && break
-          ;;
-        esac
-      done
-      # after follow
-      kill `psffmpeg | awk '{print $1}'` 2>/dev/null &
-      wait
-      rm $tmpdir/youtube_$id.lock
-      #mv $tmpdir/$name.mp4.part $tmpdir/$name.mp4
-      ffmpeg -i $tmpdir/$name.mp4 -loglevel error -acodec copy -vcodec copy $outdir/$name.mp4
-      if [[ `dursec` -gt `tmpdir=$outdir; dursec` ]]; then
-        echo "$$ [error] packet loss $name.mp4"
-        echo "$$ [warning] $name.mp4 d`ffmpeg -i $outdir/$name.mp4 2>&1 | grep -Po '(?<= D).+(?=\.[0-9]{2},)'`"
-      fi
-    else
+$   if [ $option_r ]; then
+$     # live
+$     optarg_f=`youtube-dl --list-formats $mp4 | awk '/(best)/{print $1}'`
+$     youtube-dl -q -f $optarg_f --hls-use-mpegts $mp4 --no-part -o $tmpdir/$name.mp4 2>/dev/null &
+$     # kill timer
+$     dursec() {
+$       ffmpeg -i $tmpdir/$name.mp4 2>&1 | tr ':.' ' ' | awk '/Duration/{print ($2*360) + ($3*60) + $4}'
+$     }
+$     psffmpeg() {
+$       ps x | grep -v grep | grep ffmpeg.*$id
+$     }
+$     while :
+$     do
+$       sleep 60
+$       case $optarg_t in
+$         86400)
+$         sleep 240
+$         # dash downloads
+$         dashcode=`youtube-dl --list-formats $mp4`
+$         if [[ `echo "$dashcode" | grep 'DASH video'` && ! -f $outdir/${name}_DASH.mp4 ]]; then
+$           [ ! "$dashdl" ] && echo "$$ [onair] `date '+%m-%d %H:%M:%S'` stop" && dates_stop=`date +%s`
+$           echo "$$ [backup] `date '+%m-%d %H:%M:%S'` mpeg-dash downloads"
+$           youtube-dl -q -f `echo "$dashcode" | grep 'mp4_dash' | awk 'END{print $1}'` $mp4 -o $tmpdir/${name}_VIDEO.mp4
+$           if [[ `name=${name}_VIDEO; dursec; name=${name/_VIDEO}` -ge $(($dates_stop - $dates_start - 300)) ]]; then
+$             youtube-dl -q -f `echo "$dashcode" | grep 'm4a_dash' | awk 'END{print $1}'` $mp4 -o $tmpdir/${name}_AUDIO.m4a
+$             ffmpeg -i $tmpdir/${name}_VIDEO.mp4 -i $tmpdir/${name}_AUDIO.m4a -loglevel error -vcodec copy -acodec copy $outdir/${name}_DASH.mp4
+$             echo "$$ [backup] `date '+%m-%d %H:%M:%S'` successful"
+$             echo "$$ d`ffmpeg -i $outdir/${name}_DASH.mp4 2>&1 | grep -Po '(?<= D).+(?=\.[0-9]{2},)'`"
+$           else
+$             echo "$$ [error] `date '+%m-%d %H:%M:%S'` backup failed"
+$             rm $tmpdir/${name}_VIDEO.mp4
+$           fi
+$           dashdl=on
+$         fi
+$         [[ ! `psffmpeg` || `date +%s` -ge $datedonedays ]] && break
+$         ;;
+$         *)
+$         [[ `dursec` -ge $optarg_t || ! `psffmpeg` ]] && break
+$         ;;
+$       esac
+$     done
+$     # after follow
+$     kill `psffmpeg | awk '{print $1}'` 2>/dev/null &
+$     wait
+$     rm $tmpdir/youtube_$id.lock
+$     #mv $tmpdir/$name.mp4.part $tmpdir/$name.mp4
+$     ffmpeg -i $tmpdir/$name.mp4 -loglevel error -acodec copy -vcodec copy $outdir/$name.mp4
+$     if [[ `dursec` -gt `tmpdir=$outdir; dursec` ]]; then
+$       echo "$$ [error] packet loss $name.mp4"
+$       echo "$$ [warning] $name.mp4 d`ffmpeg -i $outdir/$name.mp4 2>&1 | grep -Po '(?<= D).+(?=\.[0-9]{2},)'`"
+$     fi
+$   else
       # archive
       for mulprog in `seq 0 $((${#mp4[@]} - 1))`
       do
@@ -356,7 +356,7 @@ case $1 in
           echo "$progsrc" | grep -Po '(?<="videoDetails":{).+?(?=","isCrawlable":)' | perl -pe 's/\\n/\n/g; s/,("[a-zA-Z0-9]+?":)/\n$1/g; s/("|(title|shortDescription)":|isOwnerViewing":.*)//g' | xmler | ${nkf/ --euc} | sed -E '/(Id|ds):/{H; d;}; $G' >${outdir[$mulprog]}/${name[$mulprog]}.txt
         fi
       done
-    fi
+#   fi
   echo "$$ [$recdl] `date '+%m-%d %H:%M:%S'` $stopsuccess"
   ;;
 esac
