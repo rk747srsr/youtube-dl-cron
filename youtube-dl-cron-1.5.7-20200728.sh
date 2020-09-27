@@ -31,11 +31,6 @@ usage() {
   echo '  -N <ch>'
   echo 'help:'
   echo '  -h'
-  echo
-  echo 'live rec(slowly capture and packet lossy):'
-  echo '  --live|-r <id> -t <min>'
-  echo '   id:watch?v=id'
-  echo '   -t 0:nonstop'
   exit 0
 }
 
@@ -84,64 +79,64 @@ case $1 in
   name=(`echo $* | grep -Po '(?<= -o).+?(?=( -|$))' | tr ' ' '\n' | tac`)
   [[ `echo $* | grep -e ' -i'` ]] && option_i=on
   case $1 in
-    --live|-r)
-    option_r=on
-    if [[ ! ${2:8} || `echo $* | grep -E '(channel|user)/'` ]]; then
-      echo "$$ [error] not id=$2, exit"
-      exit 1
-    fi
-    id=${2#*?v=}
-    mp4=$url'/watch?v='$id
-    # -t option check
-    optarg_t=`echo $* | grep -Po '(?<= -t)[ 0-9]*'`
-    case ${optarg_t/ /} in
-      [0-9]*)
-      [ $optarg_t -gt 0 ] && optarg_t=$(($optarg_t * 60)) || optarg_t=86400
-      ;;
-      *)
-      echo "$$ [error] -t option, set to -t 0"
-      errtzeor='-t 0'
-      optarg_t=86400
-      ;;
-    esac
-    # id conflict check
-    if [ -f "$tmpdir/youtube_${id}.lock" -o "`ls $tmpdir/*${id}*.mp4.part 2>/dev/null`" ]; then
-      echo "$$ [error] `date '+%m-%d %H:%M:%S'` now recording $id, exit"
-      exit 1
-    fi
-    touch $tmpdir/youtube_$id.lock
-    # onair check
-    echo -n "$$ [onair] `date '+%m-%d %H:%M:%S'` standby..."
-    while :
-    do
-      [[ `youtube-dl $mp4 --get-url 2>/dev/null` ]] && break
-      sleep 1
-      standbytime=$(($standbytime + 1))
-      if [[ $standbytime -gt 600 ]]; then
-        echo
-        echo "$$ [warning] standby time 10 minutes elapsed, exit"
-        exit 1
-      fi
-    done
-    echo 'ok'
-    # separate dir name live
-    if [ $name ]; then
-      if [[ `echo $name | grep '/'` ]]; then
-        outdir=${name%/*}
-        [ ! -e $outdir ] && mkdir -p $outdir
-      fi
-      if [ ${name: -1} != '/' ]; then
-        name=${name##*/}`date +%Y%m%d`'-LIVE_'$id
-      else
-        name=$id'_'`date +%Y%m%d-%H%M`
-      fi
-    else
-      name=$id'_'`date +%Y%m%d-%H%M`
-    fi
-    recdl=rec; stopsuccess='stop'
-    dates_start=`date +%s`
-    datedonedays=`date -d 1day +%s`
-    ;;
+#   --live|-r)
+#   option_r=on
+#   if [[ ! ${2:8} || `echo $* | grep -E '(channel|user)/'` ]]; then
+#     echo "$$ [error] not id=$2, exit"
+#     exit 1
+#   fi
+#   id=${2#*?v=}
+#   mp4=$url'/watch?v='$id
+#   # -t option check
+#   optarg_t=`echo $* | grep -Po '(?<= -t)[ 0-9]*'`
+#   case ${optarg_t/ /} in
+#     [0-9]*)
+#     [ $optarg_t -gt 0 ] && optarg_t=$(($optarg_t * 60)) || optarg_t=86400
+#     ;;
+#     *)
+#     echo "$$ [error] -t option, set to -t 0"
+#     errtzeor='-t 0'
+#     optarg_t=86400
+#     ;;
+#   esac
+#   # id conflict check
+#   if [ -f "$tmpdir/youtube_${id}.lock" -o "`ls $tmpdir/*${id}*.mp4.part 2>/dev/null`" ]; then
+#     echo "$$ [error] `date '+%m-%d %H:%M:%S'` now recording $id, exit"
+#     exit 1
+#   fi
+#   touch $tmpdir/youtube_$id.lock
+#   # onair check
+#   echo -n "$$ [onair] `date '+%m-%d %H:%M:%S'` standby..."
+#   while :
+#   do
+#     [[ `youtube-dl $mp4 --get-url 2>/dev/null` ]] && break
+#     sleep 1
+#     standbytime=$(($standbytime + 1))
+#     if [[ $standbytime -gt 600 ]]; then
+#       echo
+#       echo "$$ [warning] standby time 10 minutes elapsed, exit"
+#       exit 1
+#     fi
+#   done
+#   echo 'ok'
+#   # separate dir name live
+#   if [ $name ]; then
+#     if [[ `echo $name | grep '/'` ]]; then
+#       outdir=${name%/*}
+#       [ ! -e $outdir ] && mkdir -p $outdir
+#     fi
+#     if [ ${name: -1} != '/' ]; then
+#       name=${name##*/}`date +%Y%m%d`'-LIVE_'$id
+#     else
+#       name=$id'_'`date +%Y%m%d-%H%M`
+#     fi
+#   else
+#     name=$id'_'`date +%Y%m%d-%H%M`
+#   fi
+#   recdl=rec; stopsuccess='stop'
+#   dates_start=`date +%s`
+#   datedonedays=`date -d 1day +%s`
+#   ;;
     *)
     # download option check
     case $1 in
