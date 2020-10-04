@@ -5,7 +5,8 @@ vartmpdir=/var/tmp
 outdir=$HOME/Downloads; outdir_def=$outdir
 nkf='nkf --fb-skip -m0 -Z1 -Lu'
 xmler() {
-  sed -E "s/&amp;nbsp;/ /g; s/&(apos|#039);/'/g; s/&(quot|#034);/\"/g; s/(&(amp|#038);|\\\u0026)/\&/g; s/&lt;/</g; s/&gt;/>/g"
+  sed -E "s/&amp;nbsp;/ /g; s/&(apos|#039);/'/g; s/&(quot|#034);/\"/g; s/(&(amp|#038);|u0026)/\&/g; s/&lt;/</g; s/&gt;/>/g"
+  #sed -E "s/&amp;nbsp;/ /g; s/&(apos|#039);/'/g; s/&(quot|#034);/\"/g; s/(&(amp|#038);|\\\u0026)/\&/g; s/&lt;/</g; s/&gt;/>/g"
 }
 omch=user/IKCTV
 omchinfo=iiizu
